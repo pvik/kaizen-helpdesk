@@ -64,3 +64,9 @@ Ticket Details and Worklog notes are capable of Rich Text (RTF) formatting.
 * Asset Management
 * Knowledge Base
 * Self-Service and Customizable Portal
+
+## License
+
+Copyright © 2018 Praveen Vikram and contributors
+
+Distributed under the Eclipse Public License.
