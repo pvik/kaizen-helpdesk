@@ -1,0 +1,11 @@
+{;; Database Configuration
+ :db {:dbtype   "postgresql" ;; Type = postgresql | mariadb | mssql 
+      :dbname   "kaizen"     
+      :host     "localhost"
+      :port     15432
+      :user     "dbuser"
+      :password "dbpass"}
+ 
+ ;; Redis Configuration
+ :redis {:host "localhost"
+         :port 6379}}

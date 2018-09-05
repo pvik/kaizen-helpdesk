@@ -1,0 +1,8 @@
+{:level :debug  ; e/o #{:trace :debug :info :warn :error :fatal :report}
+
+ :ns-blacklist ["org.eclipse.jetty.*"
+                "com.zaxxer.hikari.pool.*"]
+ 
+ :timestamp-opts {:pattern :iso8601
+                  :timezone (java.util.TimeZone/getTimeZone
+                             (str (java.time.ZoneId/systemDefault)))}}
