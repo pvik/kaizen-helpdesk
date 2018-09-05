@@ -24,7 +24,7 @@
     (log/info "Initializing Kaizen Help Desk")
     nil))
 
-
+;; To encode Joda objects correctly in JSON response to user
 (extend-protocol cheshire.generate/JSONable
   org.joda.time.DateTime
   (to-json [t jg]
