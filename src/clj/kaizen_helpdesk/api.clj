@@ -36,7 +36,7 @@
 
 (defn process
   "start api process pipeline
-  request -> permissions -> validations -> actions -> db -> resp (notify)"
+  request -> permissions -> validations -> actions -> db -> resp (notify, audit)"
   [request]
   (log/debug "process api request ->" request)
   (exec-api-op request))
