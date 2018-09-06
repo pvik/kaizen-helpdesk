@@ -1,7 +1,16 @@
 // Example of project-name.scss
-// Define variables to override default ones
-$primary-color: #2e5bed;
+// Define variables to override default ones 
+//$primary-color: #2e5bed;
+$primary-color: #51afef;
 $dark-color: #3e396b;
+$secondary-color: #3f444a;
+$dark-color: #282c34;
+
+$bg-color: #bbc2cf;
+ 
+$success-color: #98be65;
+$warning-color: #ECBE7B;
+$error-color: #ff6c6b;
 
 // Import full Spectre source code
 @import "modules/spectre/src/spectre";
