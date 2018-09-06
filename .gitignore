@@ -1,5 +1,6 @@
 *~
 .#*
 .nrepl-history
+.nrepl-port
 target/
 out/
