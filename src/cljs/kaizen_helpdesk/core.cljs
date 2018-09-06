@@ -1,21 +1,24 @@
 (ns kaizen-helpdesk.core
   (:require [dommy.core :as dom] 
             [hipo.core :as hipo]
-            [cljs.core.async :refer [<!]]
-            [cljs-http.client :as http]
             [hodgepodge.core :as storage]
-            [cemerick.url :as url]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [kaizen-helpdesk.auth :as auth]))
 
 (enable-console-print!)
 
 (defn init []
-  (log/info "Initializing..."))
+  (log/info "Initializing...")
+  (if (auth/logged-in?)
+    (do
+      (log/info "logged in"))
+    (do
+      (log/info "not logged in"))))
 
 (defn ^:export dashboard []
   (init)
-  (log/info "initializing whd-frontend dashboard"))
+  (log/info "kaizen dashboard"))
 
 (defn ^:export ticket []
   (init)
-  (log/info "initializing whd-frontend - ticket"))
+  (log/info "kaizen - ticket"))
