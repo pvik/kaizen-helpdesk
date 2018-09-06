@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" href="img/favicon.ico"/>
+    <title>Kaizen Help Desk</title>
+	<link rel="stylesheet" href="css/bulma.min.css">
+	<link rel="stylesheet" href="css/bulma-tooltip.min.css">
+  </head>
+  <body class="has-navbar-fixed-top">
+
+	<!-- ============= -->
+	<!--     NAVBAR    -->
+	<!-- ============= -->
+
+	<div id="navbar">
+	</div>
+	
+	<!-- ============= -->
+	<!-- Page Contents -->
+	<!-- ============= -->
+	
+	<section class="section"
+			 id="contents">
+      <div class="container is-fluid">
+		<h1 class="title">Kaizen Help Desk</h1>
+      </div>
+	</section>
+
+	<!-- ============= -->
+	<!--    MODALS     -->
+	<!-- ============= -->
+	
+	<!-- Login Modal -->
+	<div class="modal" id="login-modal">
+	  <div class="modal-background"
+		   id="login-modal-background"></div>
+	  <div class="modal-content">
+		<div class="box">
+		  <h4 class="title is-4">Login</h4>
+		  
+		  <div class="field has-addons">
+			
+			<div class="control">
+			  <div class="select">
+				<select id="login-modal-whd-instance" name="whd-instance">
+				</select>
+			  </div>
+			</div>
+
+			<p class="control has-icons-left has-icons-right">
+			  <input class="input" type="text"
+					 id="login-modal-username"
+					 name="username"
+					 placeholder="User Name">
+			  <span class="icon is-small is-left">
+				<i class="fas fa-user"></i>
+			  </span>
+			</p>
+
+			<p class="control has-icons-left">
+			  <input class="input" type="password"
+					 id="login-modal-password"
+					 name="password"
+					 placeholder="Password">
+			  <span class="icon is-small is-left">
+				<i class="fas fa-key"></i>
+			  </span>
+			</p>
+
+			<p class="control">
+			  <button class="button is-primary" id="login-btn">
+				<span class="icon is-small is-left">
+				  <i class="fas fa-sign-in-alt"></i>
+				</span> &nbsp; Login
+			  </button>
+			</p>
+
+		  </div>
+
+		  <div id="login-modal-notifications">
+		  </div>
+		</div>		
+	  </div>
+	  <button class="modal-close is-large"
+			  id="login-modal-close"
+			  aria-label="close"></button>
+	</div>
+
+
+	<!-- Loading Modal -->
+	<div class="modal" id="loading-modal">
+	  <div class="modal-background"
+		   id="loading-modal-background"></div>
+	  <div class="modal-content">
+		<div class="box">
+		  <h4 class="title is-4">Loading</h4>
+		  <p>Please Wait...</p>
+		</div>		
+	  </div>
+	  <button class="modal-close is-large"
+			  id="loading-modal-close"
+			  aria-label="close"></button>
+	</div>
+
+    <script src="main.js"></script>
+	<script>kaizen_helpdesk.core.ticket();</script>
+	<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+  </bod>
+</html>
