@@ -1,5 +1,7 @@
 (ns kaizen-helpdesk.qual
   (:require [instaparse.core :as insta]
+            #?(:clj  [clojure.edn :refer [read-string]]
+               :cljs [cljs.reader :refer [read-string]])
             #?(:clj  [clj-time.format :as f]
                :cljs [cljs-time.format :as f])))
 
@@ -36,11 +38,11 @@
 (defn process-query-qual-val [[type val]]
   (cond
     (contains? #{:STRING :NUM :NIL} type)
-    (clojure.edn/read-string val)
+    (read-string val)
 
     (= :TIMESTAMP type)
     (f/parse timestamp-formatter
-             (clojure.edn/read-string val))))
+             (read-string val))))
 
 (defn query-qual-parse [s]
   (insta/transform
@@ -71,7 +73,7 @@
     (query-qual-parse expr))))
 
 (defn eval-qual-2 [qual-str data]
-  (let [[l op r] (clojure.edn/read-string qual-str)]
+  (let [[l op r] (read-string qual-str)]
     (cond
       (and (seq? l)
            (seq? r)) (eval (list op (list eval-qual-2 (str l) data) (list eval-qual-2 (str r) data)))
