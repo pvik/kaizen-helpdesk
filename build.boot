@@ -1,5 +1,5 @@
 (set-env!
- :source-paths #{"src/clj" "src/cljs" "src/cljc"}
+ :source-paths #{"src/scss" "src/clj" "src/cljs" "src/cljc"}
  :resource-paths #{"html"}
 
  :dependencies '[[org.clojure/clojure "1.9.0"]
@@ -57,13 +57,15 @@
                  [com.cemerick/piggieback "0.2.2" :scope "test"]
                  [weasel "0.7.0" :scope "test"]
                  [org.clojure/tools.nrepl "0.2.13" :scope "test"]
-                 [mbuczko/boot-ragtime "0.3.1"]])
+                 [mbuczko/boot-ragtime "0.3.1"]
+                 [deraen/boot-sass "0.3.1"]])
 
 (require '[adzerk.boot-cljs :refer [cljs]]
          '[pandeiro.boot-http :refer [serve]]
          '[adzerk.boot-reload :refer [reload]]
          '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
-         '[mbuczko.boot-ragtime :refer [ragtime]])
+         '[mbuczko.boot-ragtime :refer [ragtime]]
+         '[deraen.boot-sass :refer [sass]])
 
 (def db-opts (:db (clojure.edn/read-string (slurp "resources/config.edn"))))
 (task-options!
@@ -72,7 +74,7 @@
                          (:user db-opts) ":"
                          (:password db-opts) "@"
                          (:host db-opts) ":"
-                         (:port db-opts) "/" (:dbname db-opts) )})
+                         (:port db-opts) "/" (:dbname db-opts))})
 
 (deftask dev
   "Launch Immediate Feedback Development Environment"
@@ -85,4 +87,5 @@
    (reload)
    (cljs-repl) ;; before cljs task
    (cljs)
+   (sass)
    (target :dir #{"target"})))
