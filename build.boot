@@ -28,7 +28,7 @@
                  [hodgepodge "0.1.3"]
                  [cljs-http "0.1.45"]
                  [com.cemerick/url "0.1.1"]
-                 [reagent "0.8.1"]
+                 ;;[reagent "0.8.1"]
                  ;; db
                  [ragtime "0.7.2"]     ;; Migrations
                  [hikari-cp "2.6.0"]    ;; Connection Pooling
