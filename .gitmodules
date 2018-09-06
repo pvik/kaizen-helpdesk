@@ -1,0 +1,3 @@
+[submodule "modules/spectre"]
+	path = modules/spectre
+	url = https://github.com/picturepan2/spectre.git
