@@ -1,7 +1,9 @@
 (ns kaizen-helpdesk.test.qual
-  (:use clojure.test)
-  (:require [clj-time.core :as t]
-            [kaizen-helpdesk.qual :as q]))
+  (:require [kaizen-helpdesk.qual :as q]
+            #?(:clj  [clojure.test :refer [deftest is testing are]]
+               :cljs [cljs.test :refer-macros [deftest is testing are]])
+            #?(:clj  [clj-time.core :as t]
+               :cljs [cljs-time.core :as t])))
 
 ;; Query Qualification Tests
 
