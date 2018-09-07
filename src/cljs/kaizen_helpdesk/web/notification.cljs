@@ -5,7 +5,7 @@
             [taoensso.timbre :as log]
             [kaizen-helpdesk.helper :as helper]))
 
-(defonce toasts (r/atom (hash-map)))
+(defonce ^:private toasts (r/atom (hash-map)))
 
 (defn add-toast [type message]
   (let [id (helper/gen-id)]
@@ -16,7 +16,10 @@
 (defn delete-toast [id]
   (swap! toasts dissoc id))
 
-(defn toast-comp
+(defn clear-all-toasts []
+  (reset! toasts (hash-map)))
+
+(defn- toast-comp
   "Toast Notification Item
   Used to render Toast Notification in
   kaizen-helpdesk.web.notifications"
@@ -25,17 +28,18 @@
    [:button.btn.btn-clear.float-right
     {:on-click (fn [e]
                  (delete-toast id))}]
-   [:span.text-dark message]])
+   [:div.text-center.text-dark message]])
 
-(defn toasts-component []
-  [:div
+(defn- toasts-component []
+  [:div.column.col-12 
+   (when (> (count @toasts) 0)
+     [:button.btn.btn-sm.btn-link.float-right
+      {:on-click (fn [e]
+                   (clear-all-toasts))} "Clear All"])
    (for [[id t] @toasts]
      ^{:key id} [toast-comp t])])
 
-(defn clear-all-toasts []
-  (reset! toasts (hash-map)))
-
-(defn render-toasts []
+(defn- render-toasts []
   (r/render [toasts-component]
             (dom/sel1 :#div-toasts)))
 
