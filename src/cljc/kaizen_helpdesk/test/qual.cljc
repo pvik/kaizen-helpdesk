@@ -39,3 +39,26 @@
         [:and
          [:> :create_date (t/date-time 2018 9 3 10 0 0 0)]
          [:= :status "New"]]  "((create-date > \"2018-09-03T10:00:00Z\") and (status = \"New\"))"))))
+
+;; Request Qualification Tests
+
+(def sample-read-api-request
+  {:api-op :read,
+   :identity {:user "admin", :exp 1536303866, :type "admin"},
+   :paginate {:limit nil, :page 1},
+   :payload {:qual "((ticket-id > 3) and (created-on <= \"2018-09-03T23:41:54Z\"))"},
+   :entity :ticket})
+
+(deftest request-qual
+  (testing "Request Qualifications"
+    (testing "with simple qualifications"
+      (are [expected qual]
+          (= expected (q/request-qual-evaluate qual sample-read-api-request))
+        true  "( api-op = :read)"
+        false "(api-op = :create)"
+        true  "(not (api-op = :create))"
+        true  "(identity.user contains \"ad\")"
+        false "(identity.user contains \"zzz\")"
+        true  "(not (identity.user contains \"zzz\"))"
+        false "((api-op = :create) and (entity = :ticket))"
+        true  "((not (api-op = :create)) and (entity = :ticket))"))))
