@@ -5,11 +5,14 @@
             [cljs.core.async :refer [<! go]]
             [taoensso.timbre :as log]
             [kaizen-helpdesk.ev-handler :as handler]
-            [kaizen-helpdesk.auth :as auth]))
+            [kaizen-helpdesk.auth :as auth]
+            [kaizen-helpdesk.web.notification :as notification]))
 
 (enable-console-print!)
 
-;;(-> js/window .-location .-href)
+(defonce _
+  (do
+    (notification/render-notifications)))
 
 (defn init []
   (log/info "Initializing...")

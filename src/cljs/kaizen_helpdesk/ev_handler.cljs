@@ -2,7 +2,9 @@
   (:require [dommy.core :as dom] 
             [cljs.core.async :refer [<! go]]
             [taoensso.timbre :as log]
-            [kaizen-helpdesk.auth :as auth]))
+            [kaizen-helpdesk.auth :as auth]
+            [kaizen-helpdesk.helper :as helper]
+            [kaizen-helpdesk.web.notification :as notify]))
 
 (defn login-ev [e]
   (dom/add-class! (dom/sel1 :#btn-login) :loading)
@@ -11,5 +13,6 @@
           password (.-value (dom/sel1 :#input-password))
           login?   (<! (auth/login username password))]
       (dom/remove-class! (dom/sel1 :#btn-login) :loading)
-      (when login?
-        (set! (.-href js/location) "index.html")))))
+      (if login?
+        (set! (.-href js/location) "index.html")
+        (notify/add-toast :error "Authentication Failed")))))
