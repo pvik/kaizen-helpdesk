@@ -76,7 +76,8 @@
                          (:user db-opts) ":"
                          (:password db-opts) "@"
                          (:host db-opts) ":"
-                         (:port db-opts) "/" (:dbname db-opts))}
+                         (:port db-opts) "/"
+                         (:dbname db-opts))}
  test    {:include #"kaizen-helpdesk.test"
           :junit-output-to "junit-out"})
 
