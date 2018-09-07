@@ -17,27 +17,26 @@
 (def query-qual-parser
   (insta/parser
    "<S>       = SIMPLE | NESTOR | NESTAND
-    SIMPLE    = <'('> NAME <' '> OP <' '> VAL <')'>
-    NESTOR    = (<'('> (S | NESTOR | NESTAND) 
-                  ( <' '> BOOLOR <' '> (S | NESTOR | NESTAND) )* <')'>)
-    NESTAND   = (<'('> (S | NESTOR | NESTAND) 
-                  ( <' '> BOOLAND <' '> (S | NESTOR | NESTAND) )* <')'>)
+    SIMPLE    = <'('> <(' ')*> NAME <(' ')+> OP <(' ')+> VAL <(' ')*> <')'>
+    NESTOR    = (<'('> <(' ')*> S ( <(' ')+> BOOLOR  <(' ')+> S )+ <(' ')*> <')'>)
+    NESTAND   = (<'('> <(' ')*> S ( <(' ')+> BOOLAND <(' ')+> S )+ <(' ')*> <')'>)
     <BOOLOR>  = 'or' 
     <BOOLAND> = 'and'
 
     NAME      = #'[-A-Za-z0-9]+'
 
-    VAL       = NUM | STRING | TIMESTAMP | NIL 
-    NUM       = #'[0-9]+'
+    VAL       = NUM | STRING | TIMESTAMP | BOOL | NIL 
+    NUM       = #'[-.0-9]+'
     STRING    = #'\".+?\"'
     TIMESTAMP = #'\"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z\"'
+    BOOL      = 'true' | 'false'
     NIL       = 'nil'
 
-    OP        = '=' | '>' | '<' | '!=' | '<=' | '>=' | 'like'"))
+    OP        = '=' | '>' | '<' | '!=' | '<=' | '>=' | 'like' | 'not-like'"))
 
 (defn process-query-qual-val [[type val]]
   (cond
-    (contains? #{:STRING :NUM :NIL} type)
+    (contains? #{:STRING :NUM :BOOL :NIL} type)
     (read-string val)
 
     (= :TIMESTAMP type)
