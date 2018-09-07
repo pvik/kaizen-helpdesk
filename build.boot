@@ -51,6 +51,7 @@
                  [org.clojure/test.check "0.9.0"]
                  ;; Dependencies for build process
                  [adzerk/boot-cljs "2.1.4"]
+                 [adzerk/boot-test "1.2.0" :scope "test"]
                  [pandeiro/boot-http "0.8.3"]
                  [adzerk/boot-reload "0.6.0"]
                  [adzerk/boot-cljs-repl "0.3.3"]
@@ -61,6 +62,7 @@
                  [deraen/boot-sass "0.3.1"]])
 
 (require '[adzerk.boot-cljs :refer [cljs]]
+         '[adzerk.boot-test :refer :all]
          '[pandeiro.boot-http :refer [serve]]
          '[adzerk.boot-reload :refer [reload]]
          '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
@@ -74,7 +76,10 @@
                          (:user db-opts) ":"
                          (:password db-opts) "@"
                          (:host db-opts) ":"
-                         (:port db-opts) "/" (:dbname db-opts))})
+                         (:port db-opts) "/" (:dbname db-opts))}
+ test    {:include #"kaizen-helpdesk.test"
+          :junit-output-to "junit-out"})
+
 
 (deftask dev
   "Launch Immediate Feedback Development Environment"
