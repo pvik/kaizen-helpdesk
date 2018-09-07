@@ -79,3 +79,84 @@
       (seq? l)       (eval (list op (list eval-qual-2 (str l) data) r))
       (seq? r)       (eval (list op (list (keyword  l) data) (list eval-qual-2 (str r) data)))
       :else          (eval (list op (list (keyword  l) data) r)))))
+
+;; ------------------------
+;; Request Qualifications
+;; ------------------------
+
+(def request-qual-parser
+  (insta/parser
+   "<S>       = SIMPLE | NESTOR | NESTAND | NESTNOT
+    SIMPLE    = <'('> <(' ')*> NAME <(' ')+> OP <(' ')+> VAL <(' ')*> <')'>
+    NESTOR    = (<'('> <(' ')*> S ( <(' ')+> BOOLOR  <(' ')+> S )+ <(' ')*> <')'>)
+    NESTAND   = (<'('> <(' ')*> S ( <(' ')+> BOOLAND <(' ')+> S )+ <(' ')*> <')'>)
+    NESTNOT   = (<'('> <(' ')*> BOOLNOT <(' ')+> S <(' ')*> <')'>)
+    <BOOLOR>  = 'or' 
+    <BOOLAND> = 'and'
+    <BOOLNOT> = 'not'
+
+    NAME      = NAMESTR (<('.')*> NAMESTR)*
+    NAMESTR   = #'[-A-Za-z0-9]+'
+
+    VAL       = NUM | STRING | KEYWORD | TIMESTAMP | BOOL | NIL 
+    NUM       = #'[-.0-9]+'
+    STRING    = #'\".+?\"'
+    KEYWORD   = #'[:][-A-Za-z]+'
+    TIMESTAMP = #'\"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z\"'
+    BOOL      = 'true' | 'false'
+    NIL       = 'nil'
+
+    OP        = '=' | '>' | '<' | '<=' | '>=' | 'contains' "))
+
+(defn process-request-qual-val [[type val]]
+  (cond
+    (contains? #{:STRING :NUM :KEYWORD :BOOL :NIL} type)
+    (read-string val)
+
+    (= :TIMESTAMP type)
+    (f/parse timestamp-formatter
+             (read-string val))))
+
+(defn process-request-qual-name [& o]
+  (reduce #(conj % (keyword (second %2))) [] o))
+
+(defn process-request-qual-op [op]
+  (cond
+    (= op "contains")
+    (fn [str match]
+      (boolean (re-find (re-pattern match) str)))
+    
+    :else
+    ((comp resolve symbol) op)))
+
+(defn request-qual-parse [s]
+  (insta/transform
+   {:NAME   process-request-qual-name
+    :OP     process-request-qual-op
+    :VAL    process-request-qual-val}
+   (request-qual-parser s)))
+
+(defn request-qual-evaluate [expr request]
+  (boolean
+   (first 
+    (clojure.walk/postwalk
+     (fn [v]
+       (cond
+         (and (coll? v) (= :SIMPLE (first v)))
+         (let [[_ k f c] v]
+           (f (reduce #(get % %2) request k) c))
+
+         (and (coll? v) (= :NESTAND (first v)))       
+         (let [exps (filter #(not (.equals % "and")) (rest v))]
+           (every? identity exps))
+
+         (and (coll? v) (= :NESTOR (first v)))       
+         (let [exps (filter #(not (.equals % "or")) (rest v))]
+           (some identity exps))
+
+         (and (coll? v) (= :NESTNOT (first v)))       
+         (let [[_ notop exp] v]
+           (not exp))
+
+         :else v))
+     (request-qual-parse expr)))))
