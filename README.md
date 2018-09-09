@@ -11,6 +11,8 @@ From the [The Zen of Python](https://www.python.org/dev/peps/pep-0020/).
 
 ---
 
+**NOTE**: This project is currently under heavy development. 
+
 Kazien Help Desk is a ticketing system designed from the ground-up with the following principles at its core
 * Handle large volume of tickets and user operations
 * Allow the system to be customized as needed
