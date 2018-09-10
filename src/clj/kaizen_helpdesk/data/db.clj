@@ -75,6 +75,16 @@
                         (:insert-into hsql-map)
                         (map sanitize-cols-for-db (:values hsql-map)))))
 
+;; schema functions
+
+(defn get-table-fields [table]
+  (first
+   (jdbc/with-db-connection [conn {:datasource datasource}]
+     (jdbc/query conn
+                 [(str "SELECT TOP 0 * " (first
+                                          (hsql/format {:format table})))]
+                 :as-arrays? true))))
+
 ;; User functions
 
 (defn get-user-password-hash [user-name]
