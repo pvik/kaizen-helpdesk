@@ -1,11 +1,7 @@
 (ns kaizen-helpdesk.core
   (:require [compojure.handler    :as handler]
             [ring.middleware.json :refer [wrap-json-response
-                                          ;;wrap-json-params
                                           wrap-json-body]]
-            ;;[ring.middleware.format :refer [wrap-restful-format]]
-            ;;[ring.middleware.cookies :refer [wrap-cookies]]
-            ;;[ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [buddy.auth.middleware :refer [wrap-authentication
                                            wrap-authorization]]
             [buddy.auth.accessrules :refer [wrap-access-rules]]
