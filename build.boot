@@ -59,7 +59,8 @@
                  [weasel "0.7.0" :scope "test"]
                  [org.clojure/tools.nrepl "0.2.13" :scope "test"]
                  [mbuczko/boot-ragtime "0.3.1"]
-                 [deraen/boot-sass "0.3.1"]])
+                 [deraen/boot-sass "0.3.1"]
+                 [tolitius/boot-check "0.1.11"]])
 
 (require '[adzerk.boot-cljs :refer [cljs]]
          '[adzerk.boot-test :refer :all]
@@ -67,7 +68,8 @@
          '[adzerk.boot-reload :refer [reload]]
          '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
          '[mbuczko.boot-ragtime :refer [ragtime]]
-         '[deraen.boot-sass :refer [sass]])
+         '[deraen.boot-sass :refer [sass]]
+         '[tolitius.boot-check :as check])
 
 (def db-opts (:db (clojure.edn/read-string (slurp "resources/config.edn"))))
 (task-options!
@@ -95,3 +97,11 @@
    (cljs)
    (sass)
    (target :dir #{"target"})))
+
+(deftask check-sources []
+  (set-env! :source-paths #{"src/clj"})
+  (comp
+   (check/with-yagni)
+   (check/with-eastwood)
+   (check/with-kibit)
+   (check/with-bikeshed)))
