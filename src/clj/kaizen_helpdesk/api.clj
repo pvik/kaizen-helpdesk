@@ -4,11 +4,11 @@
             [clojure.core.async :refer [go <!!]]
             [taoensso.timbre :as log]
             [kaizen-helpdesk.data.db :as db]
-            [kaizen-helpdesk.qual :as qual]))
+            [kaizen-helpdesk.qual :as qual]
+            [kaizen-helpdesk.helpers :as h]))
 
-;; TODO: retrieve all ticket columns as *-id from DB on startup
 (defonce ^:const ticket-id-props
-  #{:priority :status :assigned-to :updated-by :created-by})
+  (h/get-ticket-id-fields))
 
 (defn wrap-response [resp]
   {:status 200 :body resp})

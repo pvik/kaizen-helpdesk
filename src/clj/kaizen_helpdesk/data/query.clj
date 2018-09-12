@@ -6,15 +6,18 @@
 
 (def ^:const pg-limit 10)
 
-(defn select [table-name {:keys [fields limit page]}]
+(defn table-name [tbl]
+  (keyword (str "kaizen." (name tbl))))
+
+(defn select [tbl {:keys [fields limit page]}]
   (let [fs     (if fields fields [:*])
         lmt    (if limit limit pg-limit)
         offset (if page (* (- page 1) lmt) 0)]
-    (log/debug "select" fs "from" table-name)
+    (log/debug "select" fs "from" tbl)
     {:limit lmt
      :offset offset
      :select fs
-     :from   [(keyword (str "kaizen." (name table-name)))]}))
+     :from   [(table-name tbl)]}))
 
 ;; User Queries
 

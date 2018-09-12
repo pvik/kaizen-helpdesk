@@ -71,14 +71,14 @@
         :else v))
     (query-qual-parse expr))))
 
-(defn eval-qual-2 [qual-str data]
-  (let [[l op r] (read-string qual-str)]
-    (cond
-      (and (seq? l)
-           (seq? r)) (eval (list op (list eval-qual-2 (str l) data) (list eval-qual-2 (str r) data)))
-      (seq? l)       (eval (list op (list eval-qual-2 (str l) data) r))
-      (seq? r)       (eval (list op (list (keyword  l) data) (list eval-qual-2 (str r) data)))
-      :else          (eval (list op (list (keyword  l) data) r)))))
+;; (defn eval-qual-2 [qual-str data]
+;;   (let [[l op r] (read-string qual-str)]
+;;     (cond
+;;       (and (seq? l)
+;;            (seq? r)) (eval (list op (list eval-qual-2 (str l) data) (list eval-qual-2 (str r) data)))
+;;       (seq? l)       (eval (list op (list eval-qual-2 (str l) data) r))
+;;       (seq? r)       (eval (list op (list (keyword  l) data) (list eval-qual-2 (str r) data)))
+;;       :else          (eval (list op (list (keyword  l) data) r)))))
 
 ;; ------------------------
 ;; Request Qualifications

@@ -78,12 +78,17 @@
 ;; schema functions
 
 (defn get-table-fields [table]
-  (first
-   (jdbc/with-db-connection [conn {:datasource datasource}]
-     (jdbc/query conn
-                 [(str "SELECT TOP 0 * " (first
-                                          (hsql/format {:format table})))]
-                 :as-arrays? true))))
+  (let [tbl (q/table-name table)
+        qry (hsql/format {:limit 1
+                          :select [:*]
+                          :from [tbl]})
+        _ (log/debug qry)]
+    (map #(keyword (str/replace (name %) #"_" "-"))
+         (first
+          (jdbc/with-db-connection [conn {:datasource datasource}]
+            (jdbc/query conn
+                        qry
+                        {:as-arrays? true}))))))
 
 ;; User functions
 
