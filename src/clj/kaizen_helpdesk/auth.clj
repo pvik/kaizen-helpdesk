@@ -46,6 +46,7 @@
     (let [username (get-in request [:params :username])
           password (get-in request [:params :password])
           claims {:user (keyword username)
+                  :id   (u/user-id username)
                   :exp  (time/plus (time/now)
                                    (time/seconds jwt-expire-duration-secs))
                   :type (u/user-type username)}

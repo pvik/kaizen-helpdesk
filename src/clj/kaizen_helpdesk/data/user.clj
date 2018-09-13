@@ -33,6 +33,9 @@
       (argon2-verify db-pass-hash password)
       false)))
 
+(defn user-id [user-name]
+  (db/get-user-id user-name))
+
 (defn user-type [user-name]
   (db/get-user-type user-name))
 

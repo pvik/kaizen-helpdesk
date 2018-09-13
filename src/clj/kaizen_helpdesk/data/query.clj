@@ -1,6 +1,6 @@
 (ns kaizen-helpdesk.data.query
   (:require [honeysql.helpers
-             :refer [merge-where where sset insert-into values]
+             :refer [merge-where where sset insert-into values order-by]
              :as helpers]
             [taoensso.timbre   :as log]))
 
@@ -9,15 +9,25 @@
 (defn table-name [tbl]
   (keyword (str "kaizen." (name tbl))))
 
+(defn set-query-limit [query limit]
+  (if (= limit :no-limit)
+    query
+    (assoc query :limit limit)))
+
+(defn set-query-offset [query offset]
+  (if offset
+    (assoc query :offset offset)
+    query))
+
 (defn select [tbl {:keys [fields limit page]}]
-  (let [fs     (if fields fields [:*])
-        lmt    (if limit limit pg-limit)
-        offset (if page (* (- page 1) lmt) 0)]
+  (let [fs     (or fields [:*])
+        lmt    (or limit pg-limit)
+        offset (if page (* (- page 1) lmt) nil)]
     (log/debug "select" fs "from" tbl)
-    {:limit lmt
-     :offset offset
-     :select fs
-     :from   [(table-name tbl)]}))
+    (-> {:select fs
+         :from   [(table-name tbl)]}
+        (set-query-limit lmt)
+        (set-query-offset offset))))
 
 ;; User Queries
 
@@ -42,6 +52,17 @@
       (sset {:last_login logged-in})
       (where [:= :user_id (get-user-detail user-name {:fields [:user_id]})])))
 
+(defn get-user-groups [user-id]
+  (-> (select :user_group_membership {:fields [:user_group_id] :limit :no-limit})
+      (merge-where
+       [:= :user_id user-id])))
+
+;; Tech
+
+(defn get-user-id [user-name]
+  (-> (select :user_detail {:fields [:user_id]})
+      (merge-where 
+       [:= :user_name user-name])))
 
 ;; Ticket Queries
 
@@ -58,13 +79,6 @@
    (insert-into :kaizen.ticket_detail)
    (values [ticket])))
 
-;; Tech
-
-(defn get-user-id [user-name]
-  (-> (select :user_detail {:fields [:user_id]})
-      (merge-where 
-       [:= :user_name user-name])))
-
 ;; Priority
 
 (defn get-priority-id [priority-name]
@@ -78,3 +92,38 @@
   (-> (select :ticket_status {:fields [:ticket_status_id]})
       (merge-where
        [:= :status_name status-name])))
+
+;; Permissions
+
+(defn get-permissions-assignment [user-id]
+  (-> (select :permission_assignment {:fields [:permission_rule_id]
+                                      :limit :no-limit})
+      (merge-where
+       [:or
+        [:and [:= :assignment_type "USR"] [:= :user_id user-id]]
+        [:and [:= :assignment_type "GRP"] [:in :user_group_id (get-user-groups user-id)]]])))
+
+(defn get-permissions-group-assignment [user-id]
+  (-> (select :permission_group_assignment {:fields [:permission_rule_id]
+                                            :limit :no-limit})
+      (merge-where [:in :permission_group_id 
+                    (-> (select :permission_group_assignment
+                                {:fields [:permission_group_id]
+                                 :limit :no-limit})
+                        (merge-where
+                         [:or
+                          [:and [:= :assignment_type "USR"] [:= :user_id user-id]]
+                          [:and [:= :assignment_type "GRP"] [:in :user_group_id (get-user-groups user-id)]]]))])))
+
+(defn get-permissions [{:keys [user-id entity]}]
+  (-> (select :permission_rule {:fields [:*]
+                                :limit :no-limit})
+      (merge-where
+       [:and
+        [:= :entity entity]
+        [:= :enabled true]
+        [:or
+         [:= :default_rule true]
+         [:in :permission_rule_id (get-permissions-assignment user-id)]
+         [:in :permission_rule_id (get-permissions-group-assignment user-id)]]])
+      (order-by [:rule_order :asc])))

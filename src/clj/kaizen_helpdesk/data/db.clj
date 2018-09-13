@@ -81,8 +81,7 @@
   (let [tbl (q/table-name table)
         qry (hsql/format {:limit 1
                           :select [:*]
-                          :from [tbl]})
-        _ (log/debug qry)]
+                          :from [tbl]})]
     (map #(keyword (str/replace (name %) #"_" "-"))
          (first
           (jdbc/with-db-connection [conn {:datasource datasource}]
@@ -159,3 +158,9 @@
          first
          query
          q/get-status-id) status-name))
+
+;; Permissions
+
+(defn get-permissions [permission-for]
+  ((comp query
+         q/get-permissions) permission-for))

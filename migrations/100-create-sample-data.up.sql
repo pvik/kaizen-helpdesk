@@ -36,3 +36,8 @@ INSERT INTO kaizen.ticket_detail (subject, detail, status_id, priority_id, creat
 INSERT INTO kaizen.ticket_detail (subject, detail, status_id, priority_id, created_by_id)
 	   VALUES('Test 3', 'Test Ticket Detail Three', 3, 3, 1);	   
 --;;
+-- Permissions
+INSERT INTO kaizen.permission_rule (permission_name, entity, qualification, rule_order, created_by_id, description)
+VALUES ('test1', 'ticket', '(api-op = "read")', 999, 1, 'Test Rule allowing all ticket Read');
+INSERT INTO kaizen.permission_assignment (permission_rule_id, assignment_type, user_id)
+		 VALUES (1, 'USR', 2);

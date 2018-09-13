@@ -4,6 +4,7 @@
             [clojure.core.async :refer [go <!!]]
             [taoensso.timbre :as log]
             [kaizen-helpdesk.data.db :as db]
+            [kaizen-helpdesk.permission :as perm]
             [kaizen-helpdesk.qual :as qual]
             [kaizen-helpdesk.helpers :as h]))
 
@@ -17,29 +18,38 @@
   (= "admin" ((comp :type :identity) request)))
 
 (defn gen-api-op-fn [request]
+  (log/debug "gen-api-op-fn" request)
   (let [fn-name   (str (name (:api-op request)) "-" (name (:entity request)))]
     (log/debug "api-op-fn:" fn-name)
     fn-name))
 
 (defn exec-api-op [request]
+  (log/debug "exec-api-op")
   (apply
    (resolve
     (symbol (str (the-ns 'kaizen-helpdesk.api)) (gen-api-op-fn request)))
    [request]))
 
 (defn exec-db-fn [fn-name & fn-vals]
-  (log/debug "fn:" fn-name "; vals:" fn-vals)
+  (log/debug "exec db fn:" fn-name "; vals:" fn-vals)
   (apply
    (resolve
     (symbol (str (the-ns 'kaizen-helpdesk.data.db)) fn-name))
    fn-vals))
 
+(defn has-permission? [request]
+  (if (is-admin? request)
+    request
+    (perm/has-permission? request)))
+
 (defn process
   "start api process pipeline
-  request -> permissions -> validations -> actions -> db -> resp (notify, audit)"
+  request -> permissions -> validations -> actions -> exec (db) -> resp (notify, audit)"
   [request]
   (log/debug "process api request ->" request)
-  (exec-api-op request))
+  (-> request
+      has-permission?
+      exec-api-op))
 
 (defn read-ticket [request]
   (log/debug "getting ticket" (:payload request))
