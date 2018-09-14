@@ -24,8 +24,8 @@ def get_jwt(cred):
 
 def get_ticket(jwt, ticket_id):
     try:
-        r = requests.get(url = URL+"api/ticket/"+str(ticket_id),
-                         headers={'Authorization': 'Token '+jwt})
+        r = requests.get(url = URL+"api/ticket/" + str(ticket_id),
+                         headers={'Authorization': 'Token ' + jwt})
         r.raise_for_status()
         return r.json()
     except requests.exceptions.RequestException as e:
@@ -41,18 +41,24 @@ def perform_tests(cred):
     jwt = get_jwt(cred)
 
     if jwt:
+        print
         print(' - Getting Ticket #1 as ' + username)
         pp.pprint(get_ticket(jwt, 1))
 
     print("======")
+    return jwt
 
     
 def main():
+    
+    admin_jwt = perform_tests(admin_cred)
+    tech1_jwt = perform_tests(tech1_cred)
 
     perform_tests({'username': 'fail', 'password': 'pass'})
+
     
-    perform_tests(admin_cred)
-    perform_tests(tech1_cred)
+    print("\nAdmin JWT: " + admin_jwt)
+    print("\nTech1 JWT: " + tech1_jwt)
 
 if __name__ == '__main__':
     main()
