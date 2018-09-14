@@ -27,11 +27,6 @@
   (log/debug "has-permissions?" request)
   (let [perm-rules (db/get-permissions {:entity ((comp name :entity) request)
                                         :user-id ((comp :id :identity) request)})
-        _          (log/debug "perm-req:" {:entity ((comp name :entity) request)
-                                           :user-id ((comp :id :identity) request)})
-        _          (log/debug "perm rules: " perm-rules)
-        _          (doall (map #(log/debug %) perm-rules))
-        _ (log/debug "aaa")
         match-perm (first (filter #(check-permission % request) perm-rules))]
     (if match-perm
       (assoc request :permission match-perm)
