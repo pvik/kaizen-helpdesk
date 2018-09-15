@@ -47,9 +47,11 @@
   request -> permissions -> validations -> actions -> exec (db) -> resp (notify, audit)"
   [request]
   (log/debug "process api request ->" request)
-  (-> request
-      has-permission?
-      exec-api-op))
+  (try (-> request
+           has-permission?
+           exec-api-op)
+       (catch Exception e
+         {:status 500 :body (.getMessage e)})))
 
 (defn read-ticket [request]
   (log/debug "getting ticket" (:payload request))
