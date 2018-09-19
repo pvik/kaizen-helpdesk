@@ -4,74 +4,76 @@
     <meta charset="utf-8">
     <title>Kaizen Help Desk • Login</title>
     <!--[if lt IE 9]>
-		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+			<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 		<![endif]-->
-		 <link rel="stylesheet" href="css/spectre-custom.css">
+		<link rel="stylesheet" href="css/spectre-custom.css">
   </head>
   <body>
 
   	<div class="container">
-	  
-	  <!-- ============= -->
-	  <!--     NAVBAR    -->
-	  <!-- ============= -->
-	  <div class="columns">
-		<div class="column col-12 bg-dark">
-		  <header class="navbar">
-			<section class="navbar-section">
-			  <a href="login.html" class="navbar-brand mr-2">Kaizen</a>
-			</section>
-			<section class="navbar-center hide-md">
-			  <!-- centered -->
-			  <h4>Login</h4>
-			</section>
-			<section class="navbar-section hide-md">
-			</section>
- 		  </header>
-		</div>
-	  </div>
-	  
-	  <div class="columns" id="div-toasts">
-
-	  </div>
-	  
-	  <div class="columns">
-		<div class="column col-4 hide-md">
-		</div>
-		<div class="column col-lg-4 col-md-12">
-		  <span>&nbsp;</span>
-		  <div class="panel">
-			<form id="login-form" action="#">
- 			  <div class="panel-body">
-				<!-- Login form -->
-				<div class="form-group">
-				  <label class="form-label text-bold"
-						 for="input-username">Username</label>
-				  <input class="form-input" type="text"
-						 autocomplete="username"
-						 id="input-username" placeholder="Username">
+			
+			<!-- ============= -->
+			<!--     NAVBAR    -->
+			<!-- ============= -->
+			<div class="columns">
+				<div class="column col-12 bg-dark">
+					<header class="navbar">
+						<section class="navbar-section">
+							<a href="login.html" class="navbar-brand mr-2">Kaizen</a>
+						</section>
+						<section class="navbar-center hide-md">
+							<!-- centered -->
+							<h4>Login</h4>
+						</section>
+						<section class="navbar-section hide-md">
+						</section>
+ 					</header>
 				</div>
+			</div>
+			
+			<div class="columns" id="div-toasts">
 
-				<div class="form-group">
-				  <label class="form-label text-bold"
-						 for="input-password">Password</label>
-				  <input class="form-input" type="password"
-						 autocomplete="current-password"
-						 id="input-password" placeholder="Password">
+			</div>
+			
+			<div class="columns">
+				<div class="column col-4 hide-md">
 				</div>
-			  </div>
-			  <div class="panel-footer">
-				<button class="btn btn-primary btn-block" id="btn-login">Login</button>
-			  </div>
-			</form>
-		  </div>
-		</div>
-		<div class="column col-4 hide-md">
-		</div>
-	  </div>
-	</div>
+				<div class="column col-lg-4 col-md-12">
+					<span>&nbsp;</span>
+					<div class="panel">
+						<!-- <form id="form-login"> -->
+ 						<div class="panel-body">
+							<!-- Login form -->
+							<div class="form-group">
+								<label class="form-label text-bold"
+									for="input-username">Username</label>
+								<input class="form-input" type="text"
+									autocomplete="username"
+									id="input-username" placeholder="Username">
+							</div>
 
-	<script src="main.js"></script>
-	<script>kaizen_helpdesk.core.login();</script>
+							<div class="form-group">
+								<label class="form-label text-bold"
+									for="input-password">Password</label>
+								<input class="form-input" type="password"
+									autocomplete="current-password"
+									id="input-password" placeholder="Password">
+							</div>
+						</div>
+						<div class="panel-footer">
+							<button class="btn btn-primary btn-block" id="btn-login">Login</button>
+							<hr />
+							<center><a href="#">TODO: Forgot Password</a></center>
+						</div>
+						<!-- </form> -->
+					</div>
+				</div>
+				<div class="column col-4 hide-md">
+				</div>
+			</div>
+		</div>
+
+		<script src="main.js"></script>
+		<script>kaizen_helpdesk.core.login();</script>
   </body>
 </html>

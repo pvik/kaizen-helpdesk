@@ -12,7 +12,9 @@
     (let [username (.-value (dom/sel1 :#input-username))
           password (.-value (dom/sel1 :#input-password))
           login?   (<! (auth/login username password))]
-      (dom/remove-class! (dom/sel1 :#btn-login) :loading)
       (if login?
-        (set! (.-href js/location) "index.html")
-        (notify/add-toast :error "Authentication Failed")))))
+        (do 
+          (auth/is-admin?)
+          (set! (.-href js/location) "index.html"))
+        (notify/add-toast :error "Authentication Failed"))
+      (dom/remove-class! (dom/sel1 :#btn-login) :loading))))

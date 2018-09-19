@@ -53,7 +53,7 @@
           token (jwt/sign claims secret auth-alg)
           _     (u/set-last-logged-in-now! username)]
       (ok {:token token}))
-    (bad-request {:message "invalid auth data"})))
+    (bad-request {:message "invalid authentication"})))
 
 ;; Access Level Handlers
 
@@ -64,5 +64,12 @@
   (if (or (authenticated? request)
           (authenticate request))
     true
-    (error "access not allowed")))
+    (error "invalid authentication")))
+
+(defn admin-access
+  "Check if request coming in has admin access"
+  [request]
+  (if (= "admin" ((comp :type :identity) request))
+    true
+    (error "admin access required")))
 

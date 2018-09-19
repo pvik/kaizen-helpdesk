@@ -51,15 +51,17 @@
            has-permission?
            exec-api-op)
        (catch Exception e
-         {:status 500 :body (.getMessage e)})))
+         {:status 500 :body {:message (.getMessage e)
+                             :info    (ex-data e)}})))
 
-(defn read-ticket [request]
+(defn read [request]
   (log/debug "getting ticket" (:payload request))
   (let [payload   (:payload request)
         paginate  (:paginate request)
         where-str (cond (:id payload)   (str "(ticket-id = " (:id payload) ")")
                         (:qual payload) (:qual payload)
-                        :else (throw (ex-info "Invalid Read Operation")))
+                        :else (throw (ex-info "Invalid Read Operation"
+                                              {:cause "No ID or Qualification specified"})))
         _ (log/debug where-str)
         where      (qual/query-qual-evaluate where-str)
         _ (log/debug where)

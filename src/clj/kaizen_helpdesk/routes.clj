@@ -2,9 +2,10 @@
   (:require [compojure.core     :refer [defroutes context routes GET POST PUT DELETE]]
             [compojure.route    :refer [not-found files resources]]
             [ring.util.response :refer [response]]
+            [clout.core         :as    clout]
             [taoensso.timbre    :as    log]
-            [kaizen-helpdesk.auth :as auth]
-            [kaizen-helpdesk.api :as api]))
+            [kaizen-helpdesk.auth :as  auth]
+            [kaizen-helpdesk.api :as   api]))
 
 (defonce request-method-api-op-map
   {:put    :create
@@ -18,32 +19,46 @@
   (fn [request]
     (let [api-op         ((:request-method request) request-method-api-op-map)
           {:keys
-           [limit page]} (:params request)
+           [limit page qual]} (:params request)
           lim            (if limit (Integer/parseInt limit) nil)
           pg             (if page (Integer/parseInt page) nil)
-          api-request    {:api-op api-op
+          {:keys
+           [entity id]}  (#(or
+                            (clout/route-matches "/api/admin/:entity" %)
+                            (clout/route-matches "/api/admin/:entity/:id{[0-9]+}" %)
+                            (clout/route-matches "/api/:entity" %)
+                            (clout/route-matches "/api/:entity/:id{[0-9]+}" %))
+                          request)
+          api-req        {:api-op   api-op
                           :identity (:identity request)
                           :paginate {:limit lim :page pg}
-                          :payload (:body request)}
-          r           (assoc request :api-request api-request)
-          _ (log/debug "api-request:" api-request)]
+                          ;; :payload  (:body request)
+                          :entity   entity}
+          api-req2       (cond
+                           id    (assoc api-req :payload {:id (Integer/parseInt id)})
+                           qual  (assoc api-req :payload {:qual qual})
+                           :else (assoc api-req :payload (:body request)))
+          r              (assoc request :api-request api-req2)
+          _              (log/debug "api-request:" api-req2)]
       (handler r))))
+
+(defn entity-routes [api-request]
+  (routes
+   (GET "/:entity" [] (api/process api-request)) 
+   (GET "/:entity/:id{[0-9]+}" [id]
+        (api/process api-request))
+   (PUT "/:entity" [] (api/process api-request))))
 
 (defroutes api-routes
   (context "/api" [_ :as {api-request :api-request}]
-           (PUT "/ticket" []
-                (api/process (assoc api-request
-                                    :entity :ticket)))
-           (GET "/ticket/:id{[0-9]+}" [id]
-                (api/process (assoc api-request
-                                    :entity  :ticket
-                                    :payload {:id (Integer/parseInt id)})))
-           (GET "/ticket" [qual]
-                (api/process (assoc api-request
-                                    :entity  :ticket
-                                    :payload {:qual qual})))
-           (GET "/tickets" [list style qual limit page]
-                (log/info "Tickets:" list style qual limit page))))
+           
+           (GET "/is-admin" []
+                (api/wrap-response {:is-admin (api/is-admin? api-request)}))
+           
+           (context "" []
+                    (entity-routes api-request))
+           (context "/admin" []
+                    (entity-routes api-request))))
 
 (defroutes gen-routes 
   (GET "/" [] "Hello from Compojure!")  ;; for testing only
@@ -57,6 +72,8 @@
 
 (def access-rules [{:pattern #"^/login$"
                     :handler any-access}
+                   {:pattern #"^/api/admin.*"
+                    :handler auth/admin-access}
                    {:pattern #"^/api/.*"
                     :handler auth/authenticated-access}])
 

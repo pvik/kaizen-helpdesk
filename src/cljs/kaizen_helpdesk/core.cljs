@@ -6,10 +6,12 @@
             [taoensso.timbre :as log]
             [kaizen-helpdesk.ev-handler :as handler]
             [kaizen-helpdesk.auth :as auth]
+            [kaizen-helpdesk.web.components :as comp]
             [kaizen-helpdesk.web.notification :as notification]))
 
 (enable-console-print!)
 
+;; Code executed on all pages
 (defonce _
   (do
     (notification/render-notifications)))
@@ -18,18 +20,24 @@
   (log/info "Initializing...")
   (if (auth/logged-in?)
     (do
-      (log/info "logged in"))
+      (log/info "logged in")
+      (comp/render-components))
     (do
       (log/info "not logged in")
-      (dissoc! storage/local-storage :identity)
+      (auth/logout)
       (set! (.-href js/location) "login.html"))))
 
 (defn ^:export login []
   (log/info "login")
-  (dissoc! storage/local-storage :identity)
+  (when (auth/logged-in?)
+    (set! (.-href js/location) "index.html"))
   (dom/listen! (dom/sel1 :#btn-login)
                :click
-               handler/login-ev))
+               handler/login-ev)
+  ;; (dom/listen! (dom/sel1 :#form-login)
+  ;;              :submit
+  ;;              handler/login-ev)
+  )
 
 (defn ^:export dashboard []
   (init)
@@ -38,3 +46,11 @@
 (defn ^:export ticket []
   (init)
   (log/info "kaizen - ticket"))
+
+(defn ^:export admin []
+  (init)
+  (if (auth/is-admin?)
+    (do 
+      (log/info "kaizen - admin panel"))
+    (do
+      (set! (.-href js/location) "index.html"))))

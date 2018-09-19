@@ -30,7 +30,7 @@
   [request value]
   {:status 403
    :headers {}
-   :body "Not authorized"})
+   :body (str "Not authorized: " value)})
 
 (defn wrap-debug [handler lbl]
   (fn [request]
