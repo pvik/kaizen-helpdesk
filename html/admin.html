@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+  <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="shortcut icon" href="img/favicon.ico"/>
+		<title>Kaizen Help Desk • Admin Panel</title>
+		<link rel="stylesheet" href="css/spectre-custom.css">
+		<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+  </head>
+  <body>
+		
+		<div class="container">
+
+			<!--     NAVBAR    -->
+			<div class="columns">
+				<div class="column col-12 bg-dark">
+					<header class="navbar">
+						<section class="navbar-section">
+							<a href="index.html" class="navbar-brand mr-2">Kaizen</a>
+							<a href="index.html" class="btn btn-link">Dashboard</a>
+							<a href="reports.html" class="btn btn-link">Reports</a>
+						</section>
+						<section class="navbar-center">
+							<!-- centered -->
+							<div class="input-group input-inline">
+								<input class="form-input" type="text" placeholder="Search">
+							</div>
+						</section>
+						<section class="navbar-section">
+ 							<a href="settings.html" class="btn btn-link">Settings</a>
+							<div id="user-nav">
+								
+							</div>
+						</section>
+					</header>
+				</div>
+			</div>
+
+			
+			
+			<!-- Page Contents -->
+			<div class="columns">
+				<div class="column col-2 bg-dark">
+
+					<center><h4>Admin Panel</h4></center>
+
+					<!-- General Accordian -->					
+					<div class="accordion">
+						<input type="checkbox" id="accordion-general" name="accordion-checkbox" hidden>
+						<label class="accordion-header" for="accordion-general">
+							<i class="icon icon-arrow-right mr-1"></i>
+							General
+						</label>
+						<div class="accordion-body">
+							<ul class="menu menu-nav">
+                <li class="menu-item"><a href="">System</a></li>
+                <li class="menu-item"><a href="">Users</a></li>
+								<li class="menu-item"><a href="">User Groups</a></li>
+                <li class="menu-item"><a href="">Companies</a></li>
+              </ul>
+						</div>
+					</div>
+
+					<!-- Ticket Accordian -->
+					<div class="accordion">
+						<input type="checkbox" id="accordion-ticket" name="accordion-checkbox" hidden>
+						<label class="accordion-header" for="accordion-ticket">
+							<i class="icon icon-arrow-right mr-1"></i>
+							Ticket
+						</label>
+						<div class="accordion-body">
+							<ul class="menu menu-nav">
+								<li class="menu-item"><a href="">Ticket Types</a></li>
+                <li class="menu-item"><a href="">Locations</a></li>
+                <li class="menu-item"><a href="">Status</a></li>
+								<li class="menu-item"><a href="">Priority</a></li>
+								<li class="menu-item"><a href="">Custom Fields</a></li>
+              </ul>
+						</div>
+					</div>
+
+					<!-- Entities Accordian -->
+					<div class="accordion">
+						<input type="checkbox" id="accordion-entity" name="accordion-checkbox" hidden>
+						<label class="accordion-header" for="accordion-entity">
+							<i class="icon icon-arrow-right mr-1"></i>
+							Entities
+						</label>
+						<div class="accordion-body">
+							<ul class="menu menu-nav">
+								<li class="menu-item"><a href="">Entity Config</a></li>
+              </ul>
+						</div>
+					</div>
+
+					<!-- Validations Accordian -->
+					<div class="accordion">
+						<input type="checkbox" id="accordion-validations" name="accordion-checkbox" hidden>
+						<label class="accordion-header" for="accordion-validations">
+							<i class="icon icon-arrow-right mr-1"></i>
+							Validations
+						</label>
+						<div class="accordion-body">
+							<ul class="menu menu-nav">
+								<li class="menu-item"><a href="">Validation Rules</a></li>
+								<li class="menu-item"><a href="">Validation Groups</a></li>
+								<li class="menu-item"><a href="">Validation Assignment</a></li>
+              </ul>
+						</div>
+					</div>
+
+					<!-- Permissions Accordian -->
+					<div class="accordion">
+						<input type="checkbox" id="accordion-permission" name="accordion-checkbox" hidden>
+						<label class="accordion-header" for="accordion-permission">
+							<i class="icon icon-arrow-right mr-1"></i>
+							Permissions
+						</label>
+						<div class="accordion-body">
+							<ul class="menu menu-nav">
+								<li class="menu-item"><a href="">Permission Rules</a></li>
+                <li class="menu-item"><a href="">Permission Groups</a></li>
+                <li class="menu-item"><a href="">Permission Assignment</a></li>
+              </ul>
+						</div>
+					</div>
+
+					<!-- Actions Accordian -->
+					<div class="accordion">
+						<input type="checkbox" id="accordion-actions" name="accordion-checkbox" hidden>
+						<label class="accordion-header" for="accordion-actions">
+							<i class="icon icon-arrow-right mr-1"></i>
+							Actions
+						</label>
+						<div class="accordion-body">
+							<ul class="menu menu-nav">
+								<li class="menu-item"><a href="">Action Rules</a></li>
+                <li class="menu-item"><a href="">Action Groups</a></li>
+              </ul>
+						</div>
+
+					</div>
+				</div>
+
+				<!-- Main Contents  -->
+				<div class="column col-10" id="contents">
+					<!-- Toasts -->
+					<div class="columns" id="div-toasts">
+					</div>
+
+					<div id="contents">
+						<h3>General</h3>
+					</div>
+
+ 				</div>
+			</div>
+			
+			<script src="main.js"></script>
+			<script>kaizen_helpdesk.core.admin();</script>
+  </body>
+</html>
