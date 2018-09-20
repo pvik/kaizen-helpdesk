@@ -6,6 +6,8 @@ DROP TABLE IF EXISTS kaizen.user_auth_token CASCADE;
 --;;
 DROP TABLE IF EXISTS kaizen.user_auth CASCADE;
 --;;
+DROP VIEW IF EXISTS kaizen.user;
+--;;
 DROP TABLE IF EXISTS kaizen.user_detail CASCADE;
 --;;
 DROP TABLE IF EXISTS kaizen.user_type CASCADE;
