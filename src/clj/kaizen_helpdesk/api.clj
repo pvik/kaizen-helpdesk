@@ -17,18 +17,53 @@
 (defn is-admin? [request]
   (= "admin" ((comp :type :identity) request)))
 
-(defn gen-api-op-fn [request]
-  (log/debug "gen-api-op-fn" request)
-  (let [fn-name   (str (name (:api-op request)) "-" (name (:entity request)))]
-    (log/debug "api-op-fn:" fn-name)
-    fn-name))
+(defn create-op [request]
+  (log/debug "create entity" (:entity request) "request by"
+             ((comp :user :identity) request) "->" request)
+  (let [user-id ((comp :id :identity) request)
+        entity  (:entity request)
+        data    (assoc (:payload request)
+                       :created-by-id user-id
+                       :updated-by-id user-id)
+        _ (log/debug data)]
+    (db/create-entity entity data)))
+
+(defn read-op [request]
+  (log/debug "getting entity" (:entity request) "-" (:payload request))
+  (let [payload   (:payload request)
+        entity    (:entity request)
+        paginate  (:paginate request)
+        where-str (cond (:id payload)   (str "(id = " (:id payload) ")")
+                        (:qual payload) (:qual payload)
+                        :else (throw (ex-info "invalid read operation"
+                                              {:cause "no ID or qualification specified"})))
+        _         (log/debug where-str)
+        where     (qual/query-qual-evaluate where-str)
+        _         (log/debug where)
+        ticket-ch (go (db/get-entity entity where paginate))]
+    (<!! ticket-ch)))
+
+(defn update-op [request]
+  (log/debug "update entity" (:entity request) "request by"
+             ((comp :user :identity) request) "->" request)
+  (let [user-id ((comp :id :identity) request)
+        entity  (:entity request)
+        data    (assoc (:payload request)
+                       :created-by-id user-id
+                       :updated-by-id user-id)
+        _ (log/debug data)]
+    (db/update-entity entity data)))
 
 (defn exec-api-op [request]
   (log/debug "exec-api-op")
-  (apply
-   (resolve
-    (symbol (str (the-ns 'kaizen-helpdesk.api)) (gen-api-op-fn request)))
-   [request]))
+  (let [api-op (:api-op request)]
+    (log/debug "api-op:" api-op)
+    (cond
+      (= api-op :create) (create-op request)
+      (= api-op :read)   (read-op request)
+      (= api-op :update) (update-op request)
+      :else (ex-info "invalid operation"
+                     {:cause "use valid HTTP method"}))))
 
 (defn exec-db-fn [fn-name & fn-vals]
   (log/debug "exec db fn:" fn-name "; vals:" fn-vals)
@@ -49,40 +84,12 @@
   (log/debug "process api request ->" request)
   (try (-> request
            has-permission?
-           exec-api-op)
+           exec-api-op
+           wrap-response)
        (catch Exception e
+         (log/error "api error" (.getMessage e))
          {:status 500 :body {:message (.getMessage e)
                              :info    (ex-data e)}})))
 
-(defn read [request]
-  (log/debug "getting ticket" (:payload request))
-  (let [payload   (:payload request)
-        paginate  (:paginate request)
-        where-str (cond (:id payload)   (str "(ticket-id = " (:id payload) ")")
-                        (:qual payload) (:qual payload)
-                        :else (throw (ex-info "Invalid Read Operation"
-                                              {:cause "No ID or Qualification specified"})))
-        _ (log/debug where-str)
-        where      (qual/query-qual-evaluate where-str)
-        _ (log/debug where)
-        ticket-chan (go (db/get-ticket-detail where paginate))]
-    (wrap-response (<!! ticket-chan))))
-
-(defn create-ticket [request]
-  (log/debug "create ticket request by"
-             ((comp :user :identity) request) "->" request)
-  (let [user ((comp :user :identity) request)
-        data (assoc (:payload request)
-                    :created-by user
-                    :updated-by user)
-        payload (reduce (fn [p [k v]]
-                          (if (contains? ticket-id-props k)
-                            (assoc (dissoc p k)
-                                   (keyword (str (name k) "-id"))
-                                   (exec-db-fn (str "get-" (name k) "-id") v))
-                            (assoc p k v)))
-                        {} data)
-        _ (log/debug payload)]
-    (wrap-response (db/create-ticket payload))))
 
 

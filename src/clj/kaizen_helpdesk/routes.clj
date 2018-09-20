@@ -2,10 +2,17 @@
   (:require [compojure.core     :refer [defroutes context routes GET POST PUT DELETE]]
             [compojure.route    :refer [not-found files resources]]
             [ring.util.response :refer [response]]
+            [buddy.auth.accessrules :refer [error]]
             [clout.core         :as    clout]
             [taoensso.timbre    :as    log]
             [kaizen-helpdesk.auth :as  auth]
             [kaizen-helpdesk.api :as   api]))
+
+(defonce admin-entity
+  #{"user-type" "user-detail" "user-auth" "user-group" "user-group-membership"
+    "ticket-custom-field"
+    "permission-rule" "permission-group" "permission-group-member" "permission-assignment" "permission-group-assignment"
+    })
 
 (defonce request-method-api-op-map
   {:put    :create
@@ -18,6 +25,7 @@
   [handler]
   (fn [request]
     (let [api-op         ((:request-method request) request-method-api-op-map)
+          is-admin?      (api/is-admin? request)
           {:keys
            [limit page qual]} (:params request)
           lim            (if limit (Integer/parseInt limit) nil)
@@ -29,9 +37,10 @@
                             (clout/route-matches "/api/:entity" %)
                             (clout/route-matches "/api/:entity/:id{[0-9]+}" %))
                           request)
-          api-req        {:api-op   api-op
-                          :identity (:identity request)
-                          :paginate {:limit lim :page pg}
+          api-req        {:api-op    api-op
+                          :is-admin? is-admin?
+                          :identity  (:identity request)
+                          :paginate  {:limit lim :page pg}
                           ;; :payload  (:body request)
                           :entity   entity}
           api-req2       (cond
@@ -40,20 +49,26 @@
                            :else (assoc api-req :payload (:body request)))
           r              (assoc request :api-request api-req2)
           _              (log/debug "api-request:" api-req2)]
-      (handler r))))
+      (if (and (contains? admin-entity entity) (not is-admin?))
+        (error "requires admin privileges")
+        (handler r)))))
 
 (defn entity-routes [api-request]
   (routes
+   ;; READ
    (GET "/:entity" [] (api/process api-request)) 
    (GET "/:entity/:id{[0-9]+}" [id]
         (api/process api-request))
-   (PUT "/:entity" [] (api/process api-request))))
+   ;; CREATE
+   (PUT "/:entity" [] (api/process api-request))
+   ;; UPDATE
+   (POST "/:entity" [] (api/process api-request))))
 
 (defroutes api-routes
   (context "/api" [_ :as {api-request :api-request}]
            
            (GET "/is-admin" []
-                (api/wrap-response {:is-admin (api/is-admin? api-request)}))
+                (api/wrap-response {:is-admin? (:is-admin? api-request)}))
            
            (context "" []
                     (entity-routes api-request))

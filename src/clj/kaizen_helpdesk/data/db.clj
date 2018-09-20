@@ -1,4 +1,5 @@
 (ns kaizen-helpdesk.data.db
+  (:import [java.sql SQLException])
   (:require [hikari-cp.core :refer :all]
             [clj-time.core     :as t]
             [clj-time.format   :as tf]
@@ -41,6 +42,29 @@
   {:query   jdbc/query
    :execute jdbc/execute!})
 
+(defn print-sql-exception
+  "Prints the contents of an SQLException to *out*"
+  [^SQLException exception]
+  (let [^Class exception-class (class exception)]
+    (format (str "%s:" \newline
+                 " Message: %s" \newline
+                 " SQLState: %s" \newline
+                 " Error Code: %d")
+            (.getSimpleName exception-class)
+            (.getMessage exception)
+            (.getSQLState exception)
+            (.getErrorCode exception))))
+
+(defn print-sql-exception-chain
+  "Prints a chain of SQLExceptions to *out*"
+  [^SQLException exception]
+  (loop [e exception
+         err-str ""]
+    (if (not e)
+      err-str
+      (recur (.getNextException e)
+             (str (print-sql-exception e) "\n" err-str)))))
+
 (defn- sanitize-cols-for-db [map]
   (reduce (fn [m [k v]]
             (if (.contains (name k) "-")
@@ -59,8 +83,14 @@
 (defn- run-sql [hsql-map operation]
   (log/debug hsql-map)
   (jdbc/with-db-connection [conn {:datasource datasource}]
-    ((operation jdbc-operation-map) conn (hsql/format hsql-map)
-     {:row-fn sanitize-cols-from-db})))
+    (try
+      ((operation jdbc-operation-map) conn (hsql/format hsql-map)
+       {:row-fn sanitize-cols-from-db})
+      (catch SQLException e#
+        (let [ex-msg (print-sql-exception-chain e#)]
+          (log/error "SQLException:" ex-msg)
+          (ex-info "db error"
+                   {:cause ex-msg}))))))
 
 (defn- query [hsql-map]
   (run-sql hsql-map :query))
@@ -114,50 +144,35 @@
       q/set-user-last-logged-in
       execute))
 
-;; Ticket Functions
+;; Entity
 
-(defn get-ticket-detail [where-clause & [fs]]
+(defn create-entity [entity data]
+  ((comp insert
+         #(q/create-entity entity %)) data))
+
+(defn get-entity [entity where-clause & [fs]]
   ((comp
     ;;first
     query
-    #(q/get-ticket-detail % fs)) where-clause))
+    #(q/get-entity entity % fs)) where-clause))
 
-(defn create-ticket [ticket]
-  ((comp insert
-         q/create-ticket) ticket))
+(defn update-entity [entity data]
+  ((comp execute
+         #(q/update-entity entity %)) data))
 
 ;; Tech
 
 (defn get-user-id [user-name]
-  ((comp :user-id
+  ((comp :id
          first
          query
          q/get-user-id) user-name))
 
-(defn get-created-by-id [user-name]
-  (get-user-id user-name))
-
-(defn get-updated-by-id [user-name]
-  (get-user-id user-name))
-
-(defn get-assigned-to-id [user-name]
-  (get-user-id user-name))
-
-;; Priority
-
-(defn get-priority-id [priority-name]
-  ((comp :ticket-priority-id
-         first
-         query
-         q/get-priority-id) priority-name))
-
-;; Status
-
-(defn get-status-id [status-name]
-  ((comp :ticket-status-id
-         first
-         query
-         q/get-status-id) status-name))
+;; (defn get-status-id [status-name]
+;;   ((comp :id
+;;          first
+;;          query
+;;          q/get-status-id) status-name))
 
 ;; Permissions
 

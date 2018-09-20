@@ -29,6 +29,23 @@
         (set-query-limit lmt)
         (set-query-offset offset))))
 
+;; Entity
+
+(defn create-entity [entity data]
+  (->
+   (insert-into (table-name entity))
+   (values [data])))
+
+(defn get-entity [entity & [where-clause fs]]
+  (-> (select entity fs)
+      (merge-where where-clause)))
+
+(defn update-entity [entity data]
+  (->
+   (helpers/update (table-name entity))
+   (sset data)
+   (where [:= :id (:id data)])))
+
 ;; User Queries
 
 (defn get-user-detail [user-name & [fs]]
@@ -40,17 +57,17 @@
 (defn get-user-password-hash [user-name]
   (-> (select :user_auth {:fields [:password]})
       (merge-where
-       [:= :user_id (get-user-detail user-name {:fields [:user_id]})])))
+       [:= :user_id (get-user-detail user-name {:fields [:id]})])))
 
 (defn get-user-type [user-name]
   (-> (select :user_type {:fields [:user_type]})
       (merge-where
-       [:= :user_type_id (get-user-detail user-name {:fields [:user_type_id]})])))
+       [:= :id (get-user-detail user-name {:fields [:user_type_id]})])))
 
 (defn set-user-last-logged-in [{:keys [user-name logged-in]}]
   (-> (helpers/update :kaizen.user_detail)
       (sset {:last_login logged-in})
-      (where [:= :user_id (get-user-detail user-name {:fields [:user_id]})])))
+      (where [:= :id (get-user-detail user-name {:fields [:id]})])))
 
 (defn get-user-groups [user-id]
   (-> (select :user_group_membership {:fields [:user_group_id] :limit :no-limit})
@@ -60,38 +77,15 @@
 ;; Tech
 
 (defn get-user-id [user-name]
-  (-> (select :user_detail {:fields [:user_id]})
+  (-> (select :user_detail {:fields [:id]})
       (merge-where 
        [:= :user_name user-name])))
 
-;; Ticket Queries
-
-(defn get-ticket-detail [ & [where-clause fs]]
-  (-> (select :ticket fs)
-      (merge-where where-clause)))
-
-;; (defn get-ticket-detail [ticket-id & fs]
-;;   (-> (select :ticket (first fs))
-;;       (merge-where [:= :ticket_id ticket-id])))
-
-(defn create-ticket [ticket]
-  (->
-   (insert-into :kaizen.ticket_detail)
-   (values [ticket])))
-
-;; Priority
-
-(defn get-priority-id [priority-name]
-  (-> (select :ticket_priority {:fields [:ticket_priority_id]})
-      (merge-where
-       [:= :priority_name priority-name])))
-
 ;; Status
-
-(defn get-status-id [status-name]
-  (-> (select :ticket_status {:fields [:ticket_status_id]})
-      (merge-where
-       [:= :status_name status-name])))
+;; (defn get-status-id [status-name]
+;;   (-> (select :ticket_status {:fields [:id]})
+;;       (merge-where
+;;        [:= :status_name status-name])))
 
 ;; Permissions
 
