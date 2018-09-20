@@ -21,23 +21,21 @@ Kazien Help Desk is a ticketing system designed from the ground-up with the foll
 
 ### Primary Features
 
-* Customizable Ticket Entities 
-  * Multilevel Ticket Types
-  * Statuses
-  * Priorities
-  * Locations, Location Groups and Companies
-* Custom Fields
-* Customizable User Permissions
-* Programmable Validations
-* Programmable Action Rules
-* Auditing/History
-* Notifications
-* Reporting Console
-  * Create and Run reports on the Web or Export in various formats (PDF, XLSX, CSV)
-  * Schedule reports
-* Custom Filters
-* API
-* LDAP Authentication
+- [ ] Customizable Ticket Entities 
+  - [ ] Multilevel Ticket Types
+  - [x] Statuses
+  - [x] Priorities
+  - [ ] Locations, Location Groups and Companies
+- [x] Custom Fields
+- [x] Customizable User Permissions
+- [ ] Programmable Action Rules (and Validations)
+- [ ] Auditing/History
+- [ ] Notifications
+- [ ] Reporting Console
+  - [ ] Create and Run reports on the Web or Export in various formats (PDF, XLSX, CSV)
+  - [ ] Schedule reports
+- [x] API
+- [ ] LDAP Authentication
 
 ### Help Desk Features
 
