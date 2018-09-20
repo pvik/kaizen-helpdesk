@@ -44,8 +44,8 @@
 (defn is-admin? []
   (log/info "is-admin?")
   (let [username (logged-in?)]
-    (if (and username (contains? (:identity storage/local-storage) :is-admin))
-      ((comp :is-admin :identity) storage/local-storage)
+    (if (and username (contains? (:identity storage/local-storage) :is-admin?))
+      ((comp :is-admin? :identity) storage/local-storage)
       (go (let [user-id-map (:identity storage/local-storage)
                 response (<! (http/get
                               "/api/is-admin"
@@ -57,15 +57,15 @@
                 (assoc! storage/local-storage
                         :identity
                         (assoc user-id-map
-                               :is-admin (:is-admin body)))
-                (swap! user-identity :is-admin (:is-admin body))
+                               :is-admin? (:is-admin? body)))
+                (swap! user-identity :is-admin? (:is-admin? body))
                 true)
               (do
                 (assoc! storage/local-storage
                         :identity
                         (assoc user-id-map
-                               :is-admin false))
-                (swap! user-identity :is-admin false)
+                               :is-admin? false))
+                (swap! user-identity :is-admin? false)
                 false)))))))
 
 (defn login [username password]
