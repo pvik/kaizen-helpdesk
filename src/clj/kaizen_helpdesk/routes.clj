@@ -62,7 +62,9 @@
    ;; CREATE
    (PUT "/:entity" [] (api/process api-request))
    ;; UPDATE
-   (POST "/:entity" [] (api/process api-request))))
+   (POST "/:entity" [] (api/process api-request))
+   ;; DELETE
+   (DELETE "/:entity/:id{[0-9]+}" [id] (api/process api-request))))
 
 (defroutes api-routes
   (context "/api" [_ :as {api-request :api-request}]
