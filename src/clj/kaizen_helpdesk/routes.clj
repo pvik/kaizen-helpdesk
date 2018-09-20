@@ -12,7 +12,7 @@
   #{"user-type" "user-detail" "user-auth" "user-group" "user-group-membership"
     "ticket-custom-field"
     "permission-rule" "permission-group" "permission-group-member" "permission-assignment" "permission-group-assignment"
-    })
+    "action-rule"})
 
 (defonce request-method-api-op-map
   {:put    :create
