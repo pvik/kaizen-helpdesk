@@ -24,34 +24,36 @@
   "Used in ring handler to generate api-request object"
   [handler]
   (fn [request]
-    (let [api-op         ((:request-method request) request-method-api-op-map)
-          is-admin?      (api/is-admin? request)
-          {:keys
-           [limit page qual]} (:params request)
-          lim            (if limit (Integer/parseInt limit) nil)
-          pg             (if page (Integer/parseInt page) nil)
-          {:keys
-           [entity id]}  (#(or
-                            (clout/route-matches "/api/admin/:entity" %)
-                            (clout/route-matches "/api/admin/:entity/:id{[0-9]+}" %)
-                            (clout/route-matches "/api/:entity" %)
-                            (clout/route-matches "/api/:entity/:id{[0-9]+}" %))
-                          request)
-          api-req        {:api-op    api-op
-                          :is-admin? is-admin?
-                          :identity  (:identity request)
-                          :paginate  {:limit lim :page pg}
-                          ;; :payload  (:body request)
-                          :entity   entity}
-          api-req2       (cond
-                           id    (assoc api-req :payload {:id (Integer/parseInt id)})
-                           qual  (assoc api-req :payload {:qual qual})
-                           :else (assoc api-req :payload (:body request)))
-          r              (assoc request :api-request api-req2)
-          _              (log/debug "api-request:" api-req2)]
-      (if (and (contains? admin-entity entity) (not is-admin?))
-        (error "requires admin privileges")
-        (handler r)))))
+    (if (clout/route-matches "/api/*" request)
+      (let [api-op         ((:request-method request) request-method-api-op-map)
+            is-admin?      (api/is-admin? request)
+            {:keys
+             [limit page qual]} (:params request)
+            lim            (if limit (Integer/parseInt limit) nil)
+            pg             (if page (Integer/parseInt page) nil)
+            {:keys
+             [entity id]}  (#(or
+                              (clout/route-matches "/api/admin/:entity" %)
+                              (clout/route-matches "/api/admin/:entity/:id{[0-9]+}" %)
+                              (clout/route-matches "/api/:entity" %)
+                              (clout/route-matches "/api/:entity/:id{[0-9]+}" %))
+                            request)
+            api-req        {:api-op    api-op
+                            :is-admin? is-admin?
+                            :identity  (:identity request)
+                            :paginate  {:limit lim :page pg}
+                            ;; :payload  (:body request)
+                            :entity   entity}
+            api-req2       (cond
+                             id    (assoc api-req :payload {:id (Integer/parseInt id)})
+                             qual  (assoc api-req :payload {:qual qual})
+                             :else (assoc api-req :payload (:body request)))
+            r              (assoc request :api-request api-req2)
+            _              (log/debug "api-request:" api-req2)]
+        (if (and (contains? admin-entity entity) (not is-admin?))
+          (error "requires admin privileges")
+          (handler r)))
+      (handler request))))
 
 (defn entity-routes [api-request]
   (routes

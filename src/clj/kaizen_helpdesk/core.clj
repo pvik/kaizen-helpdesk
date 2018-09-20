@@ -38,7 +38,7 @@
     (handler request)))
 
 (def app (as-> #'app-routes $
-           (wrap-debug $ "After wrap-api-request: ")
+           ;; (wrap-debug $ "After wrap-api-request: ")
            (wrap-api-request $)
            (wrap-access-rules $ {:rules access-rules :on-error access-error})
            (wrap-authorization $ auth-backend)
