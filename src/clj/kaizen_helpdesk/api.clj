@@ -80,6 +80,7 @@
       (= api-op :create) (create-op request)
       (= api-op :read)   (:db request)
       (= api-op :update) (update-op request)
+      (= api-op :delete) (delete-op request)
       :else (throw (ex-info "invalid operation"
                             {:cause "use valid HTTP method"})))))
 
