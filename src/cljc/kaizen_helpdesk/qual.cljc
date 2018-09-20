@@ -95,7 +95,7 @@
     <BOOLAND> = 'and'
     <BOOLNOT> = 'not'
 
-    NAME      = NAMESTR (<('.')*> NAMESTR)*
+    NAME      = NAMESTR (<('.')?> NAMESTR)*
     NAMESTR   = #'[-A-Za-z0-9]+'
 
     VAL       = NUM | STRING | KEYWORD | TIMESTAMP | BOOL | NIL 
