@@ -89,8 +89,8 @@
       (catch SQLException e#
         (let [ex-msg (print-sql-exception-chain e#)]
           (log/error "SQLException:" ex-msg)
-          (ex-info "db error"
-                   {:cause ex-msg}))))))
+          (throw (ex-info "db error"
+                          {:cause ex-msg})))))))
 
 (defn- query [hsql-map]
   (run-sql hsql-map :query))
@@ -101,9 +101,15 @@
 (defn- insert [hsql-map]
   (log/debug hsql-map)
   (jdbc/with-db-connection [conn {:datasource datasource}]
-    (jdbc/insert-multi! conn
-                        (:insert-into hsql-map)
-                        (map sanitize-cols-for-db (:values hsql-map)))))
+    (try
+      (jdbc/insert-multi! conn
+                          (:insert-into hsql-map)
+                          (map sanitize-cols-for-db (:values hsql-map)))
+      (catch SQLException e#
+        (let [ex-msg (print-sql-exception-chain e#)]
+          (log/error "SQLException:" ex-msg)
+          (throw (ex-info "db error"
+                          {:cause ex-msg})))))))
 
 ;; schema functions
 
@@ -159,6 +165,10 @@
 (defn update-entity [entity data]
   ((comp execute
          #(q/update-entity entity %)) data))
+
+(defn delete-entity [entity id]
+  ((comp execute
+         #(q/delete-entity entity %)) id))
 
 ;; Tech
 

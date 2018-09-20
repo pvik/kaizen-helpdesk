@@ -8,7 +8,7 @@
             [kaizen-helpdesk.auth :as  auth]
             [kaizen-helpdesk.api :as   api]))
 
-(defonce admin-entity
+(defonce ^:private admin-entity
   #{"user-type" "user-detail" "user-auth" "user-group" "user-group-membership"
     "ticket-custom-field"
     "permission-rule" "permission-group" "permission-group-member" "permission-assignment" "permission-group-assignment"

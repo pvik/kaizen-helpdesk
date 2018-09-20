@@ -48,6 +48,11 @@
    (sset data)
    (where [:= :id (:id data)])))
 
+(defn delete-entity [entity id]
+  (->
+   (helpers/delete-from (table-name entity))
+   (where [:= :id id])))
+
 ;; User Queries
 
 (defn get-user-detail [user-name & [fs]]
@@ -82,12 +87,6 @@
   (-> (select :user_detail {:fields [:id]})
       (merge-where 
        [:= :user_name user-name])))
-
-;; Status
-;; (defn get-status-id [status-name]
-;;   (-> (select :ticket_status {:fields [:id]})
-;;       (merge-where
-;;        [:= :status_name status-name])))
 
 ;; Permissions
 

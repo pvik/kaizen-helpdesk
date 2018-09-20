@@ -47,20 +47,8 @@
         _ (log/debug data)]
     (db/create-entity entity data)))
 
-(defn read-op [request]
-  (log/debug "getting entity" (:entity request) "-" (:payload request))
-  (let [payload   (:payload request)
-        entity    (:entity request)
-        paginate  (:paginate request)
-        where-str (cond (:id payload)   (str "(id = " (:id payload) ")")
-                        (:qual payload) (:qual payload)
-                        :else (throw (ex-info "invalid read operation"
-                                              {:cause "no ID or qualification specified"})))
-        _         (log/debug where-str)
-        where     (qual/query-qual-evaluate where-str)
-        _         (log/debug where)
-        ticket-ch (go (db/get-entity entity where paginate))]
-    (<!! ticket-ch)))
+;; read-op function not needed, data read in with get-db-entity
+;; will be used as output of read-op
 
 (defn update-op [request]
   (log/debug "update entity" (:entity request) "request by"
@@ -73,6 +61,17 @@
         _ (log/debug data)]
     (db/update-entity entity data)))
 
+(defn delete-op [request]
+  (log/debug "delete entity" (:entity request) "request by"
+             ((comp :user :identity) request) "->" request)
+  (let [user-id ((comp :id :identity) request)
+        entity  (:entity request)
+        id      ((comp :id :payload) request)]
+    (if id
+      (db/delete-entity entity id)
+      (throw (ex-info "invalid operation"
+                      {:cause "no id specified to delete"})))))
+
 (defn exec-api-op [request]
   (log/debug "exec-api-op")
   (let [api-op (:api-op request)]
@@ -81,8 +80,8 @@
       (= api-op :create) (create-op request)
       (= api-op :read)   (:db request)
       (= api-op :update) (update-op request)
-      :else (ex-info "invalid operation"
-                     {:cause "use valid HTTP method"}))))
+      :else (throw (ex-info "invalid operation"
+                            {:cause "use valid HTTP method"})))))
 
 (defn exec-db-fn [fn-name & fn-vals]
   (log/debug "exec db fn:" fn-name "; vals:" fn-vals)
