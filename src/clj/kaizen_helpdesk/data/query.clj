@@ -19,15 +19,17 @@
     (assoc query :offset offset)
     query))
 
-(defn select [tbl {:keys [fields limit page]}]
+(defn select [tbl {:keys [fields limit page order]}]
   (let [fs     (or fields [:*])
         lmt    (or limit pg-limit)
-        offset (if page (* (- page 1) lmt) nil)]
+        offset (if page (* (- page 1) lmt) nil)
+        ord    (or order :desc)]
     (log/debug "select" fs "from" tbl)
     (-> {:select fs
          :from   [(table-name tbl)]}
         (set-query-limit lmt)
-        (set-query-offset offset))))
+        (set-query-offset offset)
+        (order-by [:id :desc]))))
 
 ;; Entity
 
@@ -98,8 +100,8 @@
         [:and [:= :assignment_type "GRP"] [:in :user_group_id (get-user-groups user-id)]]])))
 
 (defn get-permissions-group-assignment [user-id]
-  (-> (select :permission_group_assignment {:fields [:permission_rule_id]
-                                            :limit :no-limit})
+  (-> (select :permission_group_member {:fields [:permission_rule_id]
+                                        :limit :no-limit})
       (merge-where [:in :permission_group_id 
                     (-> (select :permission_group_assignment
                                 {:fields [:permission_group_id]
@@ -118,6 +120,6 @@
         [:= :enabled true]
         [:or
          [:= :default_rule true]
-         [:in :permission_rule_id (get-permissions-assignment user-id)]
-         [:in :permission_rule_id (get-permissions-group-assignment user-id)]]])
+         [:in :id (get-permissions-assignment user-id)]
+         [:in :id (get-permissions-group-assignment user-id)]]])
       (order-by [:rule_order :asc])))
