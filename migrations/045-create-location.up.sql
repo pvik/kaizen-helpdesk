@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS kaizen.company (
 	   id serial PRIMARY KEY,
-	   company_name VARCHAR(512)
+	   company_name VARCHAR(512) NOT NULL UNIQUE
 		 -- manager_id
 );
 --;;
 CREATE TABLE IF NOT EXISTS kaizen.location (
 	   id serial PRIMARY KEY,
-	   location_name VARCHAR(512),
+	   location_name VARCHAR(512) NOT NULL UNIQUE,
 		 address VARCHAR(512),
 		 address2 VARCHAR(512),
 		 city VARCHAR(128),
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS kaizen.location (
 --;;
 CREATE TABLE IF NOT EXISTS kaizen.location_group (
 	   id serial PRIMARY KEY,
-	   location_group_name VARCHAR(512)
+	   location_group_name VARCHAR(512) NOT NULL UNIQUE
 		 -- manager_id
 );
 --;;

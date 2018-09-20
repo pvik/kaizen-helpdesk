@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS kaizen.ticket (
 		assigned_group_id INT REFERENCES kaizen.user_group(id),
 		status_id         INT REFERENCES kaizen.status(id),
 		priority_id       INT REFERENCES kaizen.priority(id),
-		--location_id    INT REFERENCES kaizen.location(location_id),
+		location_id       INT REFERENCES kaizen.location(id),
     created_by_id     INT NOT NULL REFERENCES kaizen.user_detail(id),
     created_on        TIMESTAMPTZ DEFAULT now(),
 		updated_by_id     INT REFERENCES kaizen.user_detail(id),
@@ -27,6 +27,10 @@ CREATE VIEW kaizen.ticket_view AS
 	   SELECT *,
   		  (SELECT status_name FROM kaizen.status s WHERE s.id = t.status_id) as status,
    		  (SELECT priority_name FROM kaizen.priority p WHERE p.id = t.priority_id) as priority,
+				(SELECT location_name FROM kaizen.location l WHERE l.id = t.location_id) as location,
+				(SELECT company_name FROM kaizen.company c
+								WHERE c.id =
+								(SELECT company_id FROM kaizen.location l WHERE l.id = t.location_id)) as company,
 			  (SELECT user_name FROM kaizen.user_detail u WHERE u.id = t.assigned_to_id) as assigned_to,
 			  (SELECT user_group_name FROM kaizen.user_group g WHERE g.id = t.assigned_group_id) as assigned_group,
 			  (SELECT user_name FROM kaizen.user_detail u WHERE u.id = t.updated_by_id) as updated_by,
