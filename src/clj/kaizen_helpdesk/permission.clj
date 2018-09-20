@@ -8,13 +8,20 @@
 
 (defn check-permission
   "Checks if permission satisfies given request"
-  [permission request]
-  (log/debug "Checking permission" permission)
+  [request permission]
+  (log/debug "checking permission" permission)
   (log/debug "parse perm" (qual/request-qual-parse (:qualification permission)))
   (log/debug "eval perm" (qual/request-qual-evaluate (:qualification permission)
                                                      request))
   (qual/request-qual-evaluate (:qualification permission)
                               request))
+
+(defn check-permissions
+  [request permissions]
+  (log/debug "check-permissions" request)
+  (if (first (filter #(check-permission request %) permissions))
+    (or (:db request) [])
+    false))
 
 (defn has-permission?
   "Entry point to permission module.
@@ -27,8 +34,15 @@
   (log/debug "has-permissions?" request)
   (let [perm-rules (db/get-permissions {:entity ((comp name :entity) request)
                                         :user-id ((comp :id :identity) request)})
-        match-perm (first (filter #(check-permission % request) perm-rules))]
+        match-perm (if (and (not (map? (:db request)))
+                            (> (count (:db request)) 1))
+                     (reduce #(if (check-permissions (assoc request :db %2) perm-rules)
+                                (conj % %2)
+                                (conj % :no-permission))
+                             [] (:db request))
+                     (check-permissions request perm-rules))
+        _ (log/debug "match-perm" match-perm)]
     (if match-perm
-      (assoc request :permission match-perm)
+      (assoc request :db match-perm)
       (throw (ex-info "Not enough permission"
                       {:causes "not enough permission"})))))

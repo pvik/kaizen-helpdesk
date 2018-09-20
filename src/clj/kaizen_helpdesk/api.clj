@@ -17,6 +17,25 @@
 (defn is-admin? [request]
   (= "admin" ((comp :type :identity) request)))
 
+(defn get-db-entity [request]
+  (log/debug "getting DB entity" (:entity request) "-" (:payload request))
+  (if (= (:api-op request) :create)
+    (assoc request :db nil)
+    (let [payload   (:payload request)
+          entity    (:entity request)
+          paginate  (:paginate request)
+          where-str (cond (:id payload)   (str "(id = " (:id payload) ")")
+                          (:qual payload) (:qual payload)
+                          :else (throw (ex-info "invalid read operation"
+                                                {:cause "no ID or qualification specified"})))
+          _         (log/debug where-str)
+          where     (qual/query-qual-evaluate where-str)
+          _         (log/debug where)
+          entity    (db/get-entity entity where paginate)]
+      (if (<= (count entity) 1)
+        (assoc request :db (first entity))
+        (assoc request :db entity)))))
+
 (defn create-op [request]
   (log/debug "create entity" (:entity request) "request by"
              ((comp :user :identity) request) "->" request)
@@ -60,7 +79,7 @@
     (log/debug "api-op:" api-op)
     (cond
       (= api-op :create) (create-op request)
-      (= api-op :read)   (read-op request)
+      (= api-op :read)   (:db request)
       (= api-op :update) (update-op request)
       :else (ex-info "invalid operation"
                      {:cause "use valid HTTP method"}))))
@@ -83,6 +102,7 @@
   [request]
   (log/debug "process api request ->" request)
   (try (-> request
+           get-db-entity
            has-permission?
            exec-api-op
            wrap-response)
