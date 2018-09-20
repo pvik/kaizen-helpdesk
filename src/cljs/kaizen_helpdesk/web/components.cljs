@@ -14,7 +14,7 @@
     " " (:username @auth/user-identity)
     [:i.icon.icon-caret]]
    [:ul.menu.bg-dark
-    (if (:is-admin @auth/user-identity)
+    (if (:is-admin? @auth/user-identity)
       [:li.menu-item.bg-dark
        [:a {:href "admin.html"} [:i.icon.icon-link] "Admin"]])
     [:li.menu-item.bg-dark
