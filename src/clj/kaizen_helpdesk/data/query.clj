@@ -2,12 +2,13 @@
   (:require [honeysql.helpers
              :refer [merge-where where sset insert-into values order-by]
              :as helpers]
+            [clojure.string :as str]
             [taoensso.timbre   :as log]))
 
 (def ^:const pg-limit 10)
 
 (defn table-name [tbl]
-  (keyword (str "kaizen." (name tbl))))
+  (keyword (str "kaizen." (str/replace (name tbl) #"-" "_"))))
 
 (defn set-query-limit [query limit]
   (if (= limit :no-limit)
