@@ -107,7 +107,8 @@
            exec-api-op
            wrap-response)
        (catch Exception e
-         (log/error "api error" (.getMessage e))
+         (log/error "api error" (.getMessage e)
+                    (clojure.stacktrace/print-stack-trace e))
          {:status 500 :body {:message (.getMessage e)
                              :info    (ex-data e)}})))
 
