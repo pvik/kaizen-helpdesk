@@ -1,5 +1,6 @@
 (ns kaizen-helpdesk.data.db
-  (:import [java.sql SQLException])
+  (:import [java.sql SQLException]
+           [org.postgresql.util PGobject])
   (:require [hikari-cp.core :refer :all]
             [clj-time.core     :as t]
             [clj-time.format   :as tf]
@@ -7,12 +8,46 @@
             [clojure.string    :as str]
             [clojure.java.jdbc :as jdbc]
             [honeysql.core     :as hsql]
+            [cheshire.core :refer [generate-string parse-string]]
+            ;; [clojure.data.json :as json]
             ;;[honeysql.helpers :refer :all :as helpers]
             [taoensso.timbre   :as log]
             [kaizen-helpdesk.data.query :as q]))
 
 ;; For Joda Objects to be used by JDBC
 (require 'clj-time.jdbc)
+
+;; For PostgreSQL JSON fields
+;; From: https://github.com/siscia/postgres-type/
+(defn- add-jsonx-type [jsonx write-json read-json]
+  {:pre [(or (= "json" jsonx) (= "jsonb" jsonx))
+         (fn? write-json)
+         (fn? read-json)]}
+  (let [to-pgjson (fn [value]
+                    (log/debug "PROTO" value "->" (write-json value) " type" (type (write-json value)))
+                    (doto  (PGobject.)
+                      (.setType jsonx)
+                      (.setValue (write-json value))))]
+
+    (extend-protocol jdbc/ISQLValue
+      clojure.lang.IPersistentMap
+      (sql-value [value] (to-pgjson value))
+      clojure.lang.IPersistentVector
+      (sql-value [value] (to-pgjson value)))
+
+    (extend-protocol jdbc/IResultSetReadColumn
+      PGobject
+      (result-set-read-column [pgobj _metadata _index]
+        (let [type  (.getType pgobj)
+              value (.getValue pgobj)]
+          (if (= type jsonx)
+            (read-json value)
+            value))))))
+(def add-json-type (partial add-jsonx-type "json"))
+(def add-jsonb-type (partial add-jsonx-type "jsonb"))
+
+;; (add-json-type json/write-str json/read-str)
+(add-json-type generate-string parse-string)
 
 (defonce ^:private db-options
   (:db (clojure.edn/read-string (slurp "resources/config.edn"))))
@@ -38,10 +73,7 @@
 (defonce datasource
   (make-datasource datasource-options))
 
-(defonce ^:private ^:const jdbc-operation-map
-  {:query   jdbc/query
-   :execute jdbc/execute!})
-
+;; handle SQL Exceptions
 (defn print-sql-exception
   "Prints the contents of an SQLException to *out*"
   [^SQLException exception]
@@ -80,6 +112,10 @@
               (assoc m k v)))
           {} map))
 
+(defonce ^:private ^:const jdbc-operation-map
+  {:query   jdbc/query
+   :execute jdbc/execute!})
+
 (defn- run-sql [hsql-map operation]
   (log/debug hsql-map)
   (jdbc/with-db-connection [conn {:datasource datasource}]
@@ -99,7 +135,7 @@
   (run-sql hsql-map :execute))
 
 (defn- insert [hsql-map]
-  (log/debug hsql-map)
+  (log/debug "insert" hsql-map)
   (jdbc/with-db-connection [conn {:datasource datasource}]
     (try
       (jdbc/insert-multi! conn
