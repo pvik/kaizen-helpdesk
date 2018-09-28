@@ -42,12 +42,13 @@
                             :is-admin? is-admin?
                             :identity  (:identity request)
                             :paginate  {:limit lim :page pg}
-                            ;; :payload  (:body request)
+                            :payload  (:body request)
                             :entity   entity}
-            api-req2       (cond
-                             id    (assoc api-req :payload {:id (Integer/parseInt id)})
-                             qual  (assoc api-req :payload {:qual qual})
-                             :else (assoc api-req :payload (:body request)))
+            api-req2       (if (= (:api-op api-req) :read)
+                             (cond
+                               id    (assoc api-req :payload {:id (Integer/parseInt id)})
+                               qual  (assoc api-req :payload {:qual qual}))
+                             api-req)
             r              (assoc request :api-request api-req2)
             _              (log/debug "api-request:" api-req2)]
         (if (and (contains? admin-entity entity) (not is-admin?))
