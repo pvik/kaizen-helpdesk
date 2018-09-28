@@ -24,7 +24,6 @@
          (fn? write-json)
          (fn? read-json)]}
   (let [to-pgjson (fn [value]
-                    (log/debug "PROTO" value "->" (write-json value) " type" (type (write-json value)))
                     (doto  (PGobject.)
                       (.setType jsonx)
                       (.setValue (write-json value))))]
