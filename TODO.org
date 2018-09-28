@@ -1,0 +1,25 @@
+#+TITLE: TODO
+
+* Migrations
+** DONE Tables for storing permissions
+
+
+* Core
+** allow subset of fields to be requested in read operations
+** define default sort order on read operations
+*** allow for sort order to be changed from api
+** DONE joda objects while JSON encode
+** DONE admin api endpoint to add/del custom field
+** DONE get list of id based fields in ticket table
+
+* Qualification Module
+** DONE Allow range selection (less than, greater than) on timestamp values
+** DONE Support Timestamp values - Process timestamp strings into joda objects while parsing 
+
+* Custom Fields
+** Support List type Custom Fields
+
+* Frontend
+** Make default view for any entity
+** DONE setup boot for sass
+** configure [spectre](https://picturepan2.github.io/spectre/) colors
